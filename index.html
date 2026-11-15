@@ -1,0 +1,1022 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>주수별 체중 가이드</title>
+<meta name="theme-color" content="#F3F5F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13162A" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="체중 가이드">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<style>
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --ink:#1D2540; --muted:#6B7390; --line:#DDE2EC; --tint:#F6F4FD;
+  --band:#D9D3F5; --accent:#5A47C9; --rose:#D9466F; --ok:#2F8F6B; --warn:#C46A17;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#13162A; --surface:#1C2038; --ink:#E8EAF4; --muted:#9AA1BD; --line:#2E3452; --tint:#222747;
+    --band:#3A3470; --accent:#A497FF; --rose:#FF7A9C; --ok:#5CCB9E; --warn:#F0A55A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13162A; --surface:#1C2038; --ink:#E8EAF4; --muted:#9AA1BD; --line:#2E3452; --tint:#222747;
+  --band:#3A3470; --accent:#A497FF; --rose:#FF7A9C; --ok:#5CCB9E; --warn:#F0A55A;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+main{max-width:560px; margin:0 auto; padding:24px 16px 40px}
+h1{font-family:Georgia,serif; font-size:30px; line-height:1.2; margin:0 0 6px; letter-spacing:-0.5px}
+.lede{color:var(--muted); margin:0 0 22px}
+h2{font-size:16px; font-weight:600; margin:0 0 10px}
+
+.inputs{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.inputs > div{min-width:0}
+.inputs .datehint{grid-column:1 / -1; font-size:12px; color:var(--muted); margin:-2px 2px 0}
+input[type=date]{font-size:16px}
+label{display:block; font-size:13px; color:var(--muted); margin-bottom:4px}
+.field{position:relative}
+input{
+  width:100%; font:inherit; font-size:17px; color:var(--ink); background:var(--surface);
+  border:1px solid var(--line); border-radius:10px; padding:11px 40px 11px 12px; -webkit-appearance:none; appearance:none;
+}
+input[type=date]{padding-right:12px; min-height:48px}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.unit{position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:14px; pointer-events:none}
+
+.std{display:grid; grid-template-columns:repeat(4,1fr); gap:4px; margin-top:18px; padding:4px; background:var(--surface); border:1px solid var(--line); border-radius:12px}
+.std button{background:transparent; color:var(--muted); min-height:40px; padding:8px 4px; font-size:14px; font-weight:500; border-radius:8px; transition:background-color .2s, color .2s}
+.std button[aria-checked="true"]{background:var(--accent); color:#fff; font-weight:600}
+.stdnote{font-size:13px; color:var(--muted); margin:8px 2px 0}
+.empty{margin:28px 0; padding:22px; border:1px dashed var(--line); border-radius:12px; color:var(--muted); text-align:center}
+
+.summary{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:22px 0 14px}
+.summary div{background:var(--surface); padding:10px 12px}
+.summary dt{font-size:12px; color:var(--muted)}
+.summary dd{margin:2px 0 0; font-weight:600; font-size:15px}
+
+/* 그래프 카드: 높이가 고정돼 주수를 움직여도 아래 그래프가 들썩이지 않음 */
+.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px 12px 8px}
+.readout{display:flex; align-items:center; gap:14px; height:56px; padding:0 4px}
+.readout .wk{flex:none; white-space:nowrap; font-family:Georgia,serif; font-size:44px; line-height:1; color:var(--accent); min-width:2.6ch; font-variant-numeric:tabular-nums; text-align:right}
+.readout .wk small{font-size:20px; margin-left:2px}
+.readout .val{flex:1; min-width:0; font-size:15px; line-height:1.35; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.readout .val b{font-size:21px; letter-spacing:-0.3px}
+.readout .val span{display:block; color:var(--muted); font-size:13px}
+.status{font-size:13px; line-height:1.5; height:42px; margin:8px 4px 4px; font-variant-numeric:tabular-nums; overflow:hidden}
+.status div{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.status .none{color:var(--muted)}
+.status .dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:1px}
+
+.chart{width:100%; height:auto; display:block; touch-action:pan-y; cursor:crosshair; user-select:none; -webkit-user-select:none; overflow:visible}
+.chart text{font-family:inherit; fill:var(--muted); font-size:11px; font-variant-numeric:tabular-nums}
+.chart .ax{font-size:10.5px}
+.chart .tri{font-size:11px; font-weight:500}
+.chart .lbl{font-size:11px; font-weight:600}
+.legend{display:flex; flex-wrap:wrap; gap:6px 14px; font-size:12px; color:var(--muted); margin:6px 4px 2px}
+.legend i{display:inline-block; vertical-align:middle; margin-right:5px}
+.legend .lb{width:14px; height:10px; border-radius:2px; background:var(--band)}
+.legend .lm{width:14px; height:2px; background:var(--accent)}
+.legend .lr{width:8px; height:8px; border-radius:50%; background:var(--rose)}
+.legend .lt{width:0; height:12px; border-left:1.5px dashed var(--rose)}
+
+input[type=range]{padding:0; border:0; background:transparent; height:36px; accent-color:var(--accent); -webkit-appearance:auto; appearance:auto}
+.sliderrow{display:flex; align-items:center; gap:10px; margin-top:6px}
+.sliderrow input[type=range]{flex:1; min-width:0}
+#today{flex:none; min-height:36px; padding:6px 14px; font-size:14px; background:transparent; color:var(--rose); border:1px solid var(--rose); border-radius:999px; transition:background-color .2s, color .2s}
+#today[aria-pressed="true"]{background:var(--rose); color:var(--surface)}
+
+@media (prefers-reduced-motion: no-preference){
+  .chart .enter .band, .chart .enter .mid{animation:wipe .7s cubic-bezier(.2,.7,.2,1) both}
+  .chart .enter .mid{animation-delay:.1s}
+  .chart .enter .pt{animation:pop .35s cubic-bezier(.3,1.6,.5,1) both}
+  .status div, .readout .val{animation:none}
+  .fade{animation:fade .25s ease both}
+  li.new{animation:slide .35s ease both}
+}
+@keyframes wipe{from{clip-path:inset(0 100% 0 0)} to{clip-path:inset(0 0 0 0)}}
+@keyframes pop{from{transform:scale(0); opacity:0} to{transform:scale(1); opacity:1}}
+@keyframes fade{from{opacity:.25} to{opacity:1}}
+@keyframes slide{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none}}
+.chart .pt{transform-box:fill-box; transform-origin:center}
+
+.log{margin-top:28px}
+.addrow{display:grid; grid-template-columns:1fr 1fr auto; gap:8px; align-items:end}
+button{
+  font:inherit; font-weight:600; border:0; border-radius:10px; padding:12px 16px; min-height:48px;
+  background:var(--accent); color:#fff; cursor:pointer;
+}
+:root[data-theme="dark"] #add, :root[data-theme="dark"] .std button[aria-checked="true"]{color:#13162A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #add, :root:not([data-theme="light"]) .std button[aria-checked="true"]{color:#13162A}}
+ul{list-style:none; padding:0; margin:12px 0 0}
+li{display:grid; grid-template-columns:66px 1fr auto; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line)}
+li .w{font-weight:600; font-size:14px; line-height:1.3}
+li .k b{font-size:16px}
+li .k span{display:block; font-size:12px}
+li .k span.rg{color:var(--muted)}
+li .ok{color:var(--ok)} li .hi{color:var(--warn)} li .lo{color:var(--accent)}
+.del{background:transparent; color:var(--muted); min-height:36px; padding:6px 8px; font-weight:400; font-size:13px}
+.hint{color:var(--muted); font-size:13px; margin-top:8px}
+.sharerow{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px}
+.sharebtn{width:100%; background:#FEE500; color:#191919; padding:12px 8px}
+#imgOut{display:block; width:100%; max-width:360px; margin:12px auto 0; border-radius:12px; border:1px solid var(--line)}
+#shareText{width:100%; margin-top:10px; font:inherit; font-size:14px; line-height:1.5; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px 12px; resize:vertical}
+.comp{margin-top:16px; padding:14px 16px}
+.comp h2 span{font-weight:500; color:var(--muted); font-size:14px; margin-left:4px}
+.stack{display:flex; height:14px; border-radius:7px; overflow:hidden; background:var(--line)}
+.stack i{display:block; height:100%; width:0; transition:width .35s ease}
+.c1{background:var(--rose)} .c2{background:#E9A23B} .c3{background:var(--band)} .c4{background:var(--accent)}
+.crows{margin:12px 0 0; display:grid; gap:6px}
+.crows div{display:flex; justify-content:space-between; gap:10px; font-size:14px}
+.crows dt{color:var(--muted)} .crows dd{margin:0; font-weight:600; font-variant-numeric:tabular-nums}
+.sw{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:7px; vertical-align:-1px}
+.pure{margin:12px 0 0; padding:10px 12px; border-radius:10px; background:var(--tint); font-size:14px; line-height:1.5}
+.pure:empty{display:none}
+@media (prefers-reduced-motion: reduce){ .stack i{transition:none} }
+.viewnote{font-size:13px; line-height:1.5; margin:10px 0 0; padding:10px 12px; border-radius:10px; background:var(--tint); color:var(--ink)}
+li.mine .k b::after{content:' 이 기기만'; font-size:11px; font-weight:500; color:var(--muted); margin-left:4px}
+
+details{margin-top:28px; border-top:1px solid var(--line); padding-top:14px}
+summary{font-weight:600; cursor:pointer}
+.tablewrap{overflow-x:auto}
+table{width:100%; border-collapse:collapse; margin-top:10px; font-size:14px; font-variant-numeric:tabular-nums}
+th,td{text-align:right; padding:8px 6px; border-bottom:1px solid var(--line); white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:500; color:var(--muted); font-size:12px}
+tr.cur td{color:var(--accent); font-weight:600}
+.note{margin-top:28px; font-size:12px; color:var(--muted); line-height:1.6}
+@media (max-width:380px){
+  .readout .wk{font-size:38px}
+  .readout .val b{font-size:18px}
+}
+
+.bkrow{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:22px}
+.ghost{display:flex; align-items:center; justify-content:center; width:100%; background:transparent; color:var(--accent); border:1px solid var(--line); border-radius:10px; min-height:48px; padding:10px 8px; font-weight:600; font-size:15px; cursor:pointer; margin:0}
+.filebtn input{position:absolute; width:1px; height:1px; opacity:0; pointer-events:none}
+.filebtn{position:relative}
+.filebtn:focus-within{outline:2px solid var(--accent); outline-offset:2px}
+
+.banner{display:flex; align-items:center; gap:10px; padding:12px 12px 12px 14px; margin:0 0 14px; background:var(--surface); border:1px solid var(--line); border-radius:12px}
+.banner > div{flex:1; min-width:0; font-size:13px; line-height:1.45}
+.banner b{display:block; font-size:14px}
+.banner span{color:var(--muted)}
+.banner.warn{border-color:var(--warn)}
+.banner .x{background:transparent; color:var(--muted); min-height:36px; min-width:36px; padding:0; font-size:22px; font-weight:400}
+button.primary{background:var(--accent); color:#fff}
+button.sm{min-height:40px; padding:8px 14px; font-size:14px; flex:none}
+button.danger{background:transparent; color:var(--rose); border:1px solid var(--rose)}
+.persist{display:flex; align-items:center; gap:10px; margin-top:14px}
+.persist .hint{flex:1; margin:0}
+.persist .ghost{width:auto; flex:none; padding:8px 12px; min-height:40px; font-size:14px}
+.ver{margin-top:10px}
+.sheet-bg{position:fixed; inset:0; background:rgba(10,12,24,.45); opacity:0; transition:opacity .2s; z-index:50}
+.sheet{position:fixed; left:0; right:0; bottom:0; z-index:51; max-width:560px; margin:0 auto; background:var(--surface); color:var(--ink);
+  border-radius:18px 18px 0 0; padding:20px 16px calc(16px + env(safe-area-inset-bottom,0px)); display:grid; gap:8px;
+  transform:translateY(100%); transition:transform .22s cubic-bezier(.2,.8,.2,1); box-shadow:0 -8px 30px rgba(0,0,0,.25)}
+.sheet h3{margin:0; font-size:17px}
+.sheet p{margin:0 0 6px; color:var(--muted); font-size:14px}
+.sheet button{width:100%; min-height:50px}
+.sheet-bg.on{opacity:1} .sheet.on{transform:none}
+@media (prefers-reduced-motion: reduce){ .sheet, .sheet-bg{transition:none} }
+:root[data-theme="dark"] button.primary{color:#13162A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.primary{color:#13162A}}
+input{font-size:16px}
+body{min-height:100dvh}
+html,body{overflow-x:hidden}
+</style>
+<style>[hidden]{display:none!important}</style>
+</head>
+<body>
+<main>
+  <h1>주수별 체중 가이드</h1>
+  <p class="lede">임신 전 체중과 키를 넣으면 주마다 권장 체중 범위를 보여줘요.</p>
+  <div class="banner" id="installBanner" hidden>
+    <div><b>홈 화면에 앱으로 설치</b><span id="installText">Claude·카톡에서 열었다면 메뉴(⋮) → 'Chrome에서 열기' → Chrome 메뉴(⋮) → '홈 화면에 추가' → '설치'</span></div>
+    <button type="button" id="installBtn" class="primary sm" hidden>설치</button>
+    <button type="button" id="installClose" class="x" aria-label="설치 안내 닫기">×</button>
+  </div>
+  <div class="banner warn" id="bkBanner" hidden>
+    <div><b>백업한 지 2주가 넘었어요</b><span>기록은 이 폰에만 있어요. 백업 파일을 카톡 '나에게 보내기'로 보관해두세요.</span></div>
+    <button type="button" id="bkNow" class="primary sm">백업</button>
+  </div>
+
+  <section class="inputs">
+    <div>
+      <label for="base">임신 전 체중</label>
+      <div class="field"><input id="base" type="number" inputmode="decimal" step="0.1" min="30" max="200" placeholder="55"><span class="unit">kg</span></div>
+    </div>
+    <div>
+      <label for="height">키</label>
+      <div class="field"><input id="height" type="number" inputmode="decimal" step="0.1" min="120" max="210" placeholder="162"><span class="unit">cm</span></div>
+    </div>
+    <div>
+      <label for="lmp">임신 시작일</label>
+      <input id="lmp" type="date">
+    </div>
+    <div>
+      <label for="due">출산 예정일</label>
+      <input id="due" type="date">
+    </div>
+    <p class="datehint" id="dateHint">임신 시작일 = 마지막 생리 시작일. 하나만 바꾸면 나머지는 자동 계산돼요(+280일).</p>
+  </section>
+
+  <div class="std" role="radiogroup" aria-label="권장 기준">
+    <button type="button" role="radio" data-std="auto">자동</button>
+    <button type="button" role="radio" data-std="jp2021">일본 2021</button>
+    <button type="button" role="radio" data-std="cn2022">중국 2022</button>
+    <button type="button" role="radio" data-std="iom2009">미국 2009</button>
+  </div>
+  <p class="stdnote" id="stdNote"></p>
+
+  <div id="empty" class="empty">임신 전 체중과 키를 입력하면 그래프가 그려져요.</div>
+
+  <div id="main" hidden="">
+    <dl class="summary">
+      <div><dt>임신 전 BMI</dt><dd id="sBmi"></dd></div>
+      <div><dt>총 권장 증가</dt><dd id="sTotal"></dd></div>
+      <div><dt>출산 무렵 목표</dt><dd id="sRate"></dd></div>
+    </dl>
+
+    <div class="card">
+      <div class="readout">
+        <div class="wk" id="rWk"></div>
+        <div class="val"><b id="rKg"></b><span id="rGain"></span></div>
+      </div>
+      <div class="status" id="rStatus"><div id="st1"></div><div id="st2"></div></div>
+
+      <svg id="chart" class="chart" viewBox="0 0 360 250" role="img" aria-label="주수별 권장 체중 범위 그래프">
+        <g id="gStatic"></g>
+        <g id="gCursor"></g>
+      </svg>
+      <div class="legend" aria-hidden="true">
+        <span><i class="lb"></i>권장 범위</span>
+        <span><i class="lm"></i>중앙값</span>
+        <span><i class="lr"></i>내 기록</span>
+        <span><i class="lt"></i>오늘</span>
+      </div>
+      <div class="sliderrow">
+        <input id="slider" type="range" min="0" max="40" step="1" aria-label="주수 선택">
+        <button id="today" type="button" aria-pressed="false">오늘</button>
+      </div>
+    </div>
+
+    <section class="card comp">
+      <h2>무게 구성 <span id="cWk"></span></h2>
+      <div class="stack" id="cBar" aria-hidden="true"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i></div>
+      <dl class="crows">
+        <div><dt><i class="sw c1"></i>예상 아기</dt><dd id="c1"></dd></div>
+        <div><dt><i class="sw c2"></i>태반·양수</dt><dd id="c2"></dd></div>
+        <div><dt><i class="sw c3"></i>자궁·유방·혈액·체액</dt><dd id="c3"></dd></div>
+        <div><dt><i class="sw c4"></i>엄마 순수 증가(지방 등)</dt><dd id="c4"></dd></div>
+      </dl>
+      <p class="pure" id="cPure"></p>
+      <p class="hint">권장 증가량 중앙값을 구성별로 나눈 값이에요. 아기는 Hadlock 평균(50백분위), 나머지는 Hytten 임신 체중 구성 연구 기준 추정치예요.</p>
+    </section>
+
+    <section class="log">
+      <h2>체중 기록</h2>
+      <div class="addrow">
+        <div>
+          <label for="lw">주.일 <span style="font-size:12px">(15.4 = 15주 4일)</span></label>
+          <div class="field"><input id="lw" type="text" inputmode="decimal" placeholder="15.4"><span class="unit">주</span></div>
+        </div>
+        <div>
+          <label for="lk">체중</label>
+          <div class="field"><input id="lk" type="number" inputmode="decimal" step="0.1" min="30" max="250"><span class="unit">kg</span></div>
+        </div>
+        <button id="add" type="button">기록 추가</button>
+      </div>
+      <ul id="list"></ul>
+      <p class="hint" id="logHint">기록을 추가하면 그래프에 점으로 표시돼요.</p>
+      <div class="sharerow">
+        <button id="share" type="button" class="sharebtn">카톡용 텍스트 요약</button>
+        <button id="shareImg" type="button" class="sharebtn">요약 이미지 저장</button>
+      </div>
+      <div id="shareBox" hidden=""><textarea id="shareText" rows="9" readonly=""></textarea><p class="hint" id="shareHint"></p></div>
+      <div id="imgBox" hidden=""><img id="imgOut" alt="체중 요약 이미지"><p class="hint" id="imgHint"></p></div>
+      <div class="bkrow">
+        <button id="bkOut" type="button" class="ghost">백업 파일 저장</button>
+        <label class="ghost filebtn">백업 불러오기<input id="bkIn" type="file" accept="application/json,.json"></label>
+      </div>
+      <div class="persist"><p class="hint" id="persistInfo"></p><button type="button" id="persistBtn" class="ghost">저장공간 보호 요청</button></div>
+      <p class="hint" id="bkHint">기록은 이 폰에만 저장돼요. 폰을 바꾸거나 앱을 지우기 전에 백업 파일을 저장해두세요.</p>
+    </section>
+
+    <details>
+      <summary>주요 주수별 표</summary>
+      <div class="tablewrap"><table id="table"></table></div>
+    </details>
+  </div>
+
+  <p class="note">미국 IOM 기준은 2009년 이후 공식 개정이 없고(2025년 개정 검토 워크숍만 진행), 한국은 별도 공식 기준 없이 주로 IOM을 따라요. 일본(2021)과 중국(2022) 기준은 아시아 임신부 데이터로 새로 만든 최신 기준입니다. 1분기(~13주)는 0~2kg 안팎, 이후는 출산 시점 총 권장량까지 일정하게 늘어난다고 가정했어요. 단태아 기준이고, 개인 목표는 담당 의사와 확인하세요.</p>
+  <p class="note ver">v1.2.0 · 모든 기록은 이 폰 안에만 저장되고 어떤 서버로도 보내지 않아요.</p>
+</main>
+
+<script>
+(function(){
+  var APP_VERSION = '1.2.0';
+  var $ = function(id){ return document.getElementById(id); };
+  var KEY = 'preg-weight-v1', BKKEY = 'preg-weight-lastbackup';
+  var state = { base:'', height:'', due:'', std:'auto', logs:[] };
+  var local = null;
+  try { local = JSON.parse(localStorage.getItem(KEY)); if (local) state = Object.assign(state, local); } catch(e){}
+  var mine = [], localMode = false;
+  function saveMine(){}
+  function allLogs(){ return state.logs; }
+
+  // IndexedDB (meta 스토어, keyPath 'id')
+  var idbP = null;
+  function idb(){
+    if (idbP) return idbP;
+    idbP = new Promise(function(res, rej){
+      if (!window.indexedDB) return rej(new Error('no idb'));
+      var r = indexedDB.open('baekdo-weight', 1);
+      r.onupgradeneeded = function(){ r.result.createObjectStore('meta', { keyPath:'id' }); };
+      r.onsuccess = function(){ res(r.result); }; r.onerror = function(){ rej(r.error); };
+    });
+    return idbP;
+  }
+  function idbGet(id){ return idb().then(function(db){ return new Promise(function(res, rej){
+    var q = db.transaction('meta').objectStore('meta').get(id);
+    q.onsuccess = function(){ res(q.result ? q.result.value : undefined); }; q.onerror = function(){ rej(q.error); }; }); }); }
+  function idbPut(id, value){ return idb().then(function(db){ return new Promise(function(res, rej){
+    var t = db.transaction('meta', 'readwrite'); t.objectStore('meta').put({ id:id, value:value });
+    t.oncomplete = function(){ res(); }; t.onerror = function(){ rej(t.error); }; }); }); }
+  function snapshot(){
+    return { base:state.base||'', height:state.height||'', due:state.due||'', std:state.std||'auto',
+      logs:state.logs.map(function(l){ return { w:l.w, k:l.k }; }), updatedAt:state.updatedAt||0 };
+  }
+  function saveLocal(){
+    var s = snapshot();
+    try { localStorage.setItem(KEY, JSON.stringify(s)); } catch(e){}
+    idbPut('state', s).catch(function(){});
+  }
+  function save(){ state.updatedAt = Date.now(); saveLocal(); }
+  var lastBackup = 0;
+  try { lastBackup = +localStorage.getItem(BKKEY) || 0; } catch(e){}
+  function markBackup(){
+    lastBackup = Date.now();
+    try { localStorage.setItem(BKKEY, String(lastBackup)); } catch(e){}
+    idbPut('lastBackup', lastBackup).catch(function(){});
+    updateBanners();
+  }
+  var reduce = false;
+  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){}
+
+  // ---- 하단 시트 (confirm 대신) ----
+  function sheet(title, msg, buttons){
+    return new Promise(function(resolve){
+      var bg = document.createElement('div'); bg.className = 'sheet-bg';
+      var el = document.createElement('div'); el.className = 'sheet'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+      var t = document.createElement('h3'); t.textContent = title; el.appendChild(t);
+      if (msg){ var p = document.createElement('p'); p.textContent = msg; el.appendChild(p); }
+      function close(v){ bg.remove(); el.remove(); window.removeEventListener('keydown', onKey); resolve(v); }
+      function onKey(e){ if (e.key === 'Escape') close(null); }
+      buttons.forEach(function(b){
+        var x = document.createElement('button'); x.type = 'button'; x.textContent = b.label;
+        x.className = b.kind || 'ghost'; x.addEventListener('click', function(){ close(b.value); }); el.appendChild(x);
+      });
+      bg.addEventListener('click', function(){ close(null); });
+      window.addEventListener('keydown', onKey);
+      document.body.appendChild(bg); document.body.appendChild(el);
+      requestAnimationFrame(function(){ bg.classList.add('on'); el.classList.add('on'); var f = el.querySelector('button'); if (f) f.focus(); });
+    });
+  }
+
+  // ---- 백업 / 복원 (JSON 파일) ----
+  function stamp(){ var t = new Date(); return t.getFullYear() + String(t.getMonth()+1).padStart(2,'0') + String(t.getDate()).padStart(2,'0'); }
+  function downloadBlob(blob, name){
+    var a = document.createElement('a'), u = URL.createObjectURL(blob);
+    a.href = u; a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(u); a.remove(); }, 1500);
+  }
+  function setBk(t){ $('bkHint').textContent = t; }
+  function exportBackup(){
+    var data = { app:'baekdo-weight', version:1, exportedAt:new Date().toISOString(),
+      base:state.base||'', height:state.height||'', due:state.due||'', std:state.std||'auto',
+      logs:state.logs.map(function(l){ return { w:l.w, k:l.k }; }), updatedAt:state.updatedAt||0 };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+    var name = '체중기록_백업_' + stamp() + '.json';
+    var file = null; try { file = new File([blob], name, { type:'application/json' }); } catch(e){}
+    if (file && navigator.canShare && navigator.canShare({ files:[file] })){
+      navigator.share({ files:[file] }).then(function(){ markBackup(); setBk('백업 파일을 공유했어요.'); },
+        function(e){ if (!e || e.name !== 'AbortError'){ downloadBlob(blob, name); markBackup(); setBk('다운로드 폴더에 저장했어요.'); } });
+    } else { downloadBlob(blob, name); markBackup(); setBk('다운로드 폴더에 저장했어요.'); }
+  }
+  function cleanLogs(arr){
+    return arr.map(function(l){ return { w:+l.w, k:+l.k }; })
+      .filter(function(l){ return isFinite(l.w) && isFinite(l.k) && l.w >= 0 && l.w <= 42 && l.k > 20 && l.k < 300; })
+      .sort(function(a,b){ return a.w-b.w; });
+  }
+  function applyState(){
+    $('base').value = state.base || ''; $('height').value = state.height || ''; $('due').value = state.due || '';
+    staticKey = ''; listKey = ''; selW = null; $('lw').value = '';
+    render(); updateBanners();
+  }
+  // mode: 'merge' | 'replace'
+  function importData(d, mode){
+    if (!d || !Array.isArray(d.logs)) throw new Error('이 앱의 백업 파일이 아니에요.');
+    var logs = cleanLogs(d.logs);
+    var newer = (d.updatedAt || Date.parse(d.exportedAt) || 0) >= (state.updatedAt || 0);
+    if (mode === 'replace' || !state.logs.length && !state.base){
+      ['base','height','due','std'].forEach(function(f){ if (d[f] !== undefined) state[f] = String(d[f]); });
+      state.logs = logs;
+    } else {
+      if (newer) ['base','height','due','std'].forEach(function(f){ if (d[f] !== undefined && d[f] !== '') state[f] = String(d[f]); });
+      var a = newer ? logs : state.logs, b = newer ? state.logs : logs, out = a.slice();
+      b.forEach(function(l){ if (!out.some(function(o){ return Math.round(o.w*7) === Math.round(l.w*7); })) out.push(l); });
+      state.logs = cleanLogs(out);
+    }
+    save(); markBackup(); applyState();
+    return state.logs.length;
+  }
+  function importBackup(file){
+    var fr = new FileReader();
+    fr.onload = function(){
+      var d; try { d = JSON.parse(fr.result); } catch(e){ setBk('백업 파일을 읽을 수 없어요.'); return; }
+      if (!d || !Array.isArray(d.logs)){ setBk('이 앱의 백업 파일이 아니에요.'); return; }
+      var n = cleanLogs(d.logs).length;
+      var empty = !state.logs.length && !state.base;
+      var btns = empty ? [{ label:'불러오기', value:'replace', kind:'primary' }, { label:'취소', value:null }]
+        : [{ label:'합치기 (같은 날 기록은 최신 우선)', value:'merge', kind:'primary' },
+           { label:'전체 바꾸기', value:'replace', kind:'danger' }, { label:'취소', value:null }];
+      sheet('백업 불러오기', '백업 파일에 기록 ' + n + '개가 있어요.' + (empty ? '' : ' 지금 기록은 ' + state.logs.length + '개예요.'), btns)
+        .then(function(mode){
+          if (!mode) return;
+          var cnt = importData(d, mode);
+          setBk((mode === 'merge' ? '합쳤어요' : '불러왔어요') + '. 기록 ' + cnt + '개');
+        });
+    };
+    fr.readAsText(file);
+  }
+
+  // ---- 설치 안내 · 백업 알림 · 저장공간 보호 ----
+  var installPrompt = null;
+  function isStandalone(){ try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch(e){ return false; } }
+  function updateBanners(){
+    var ib = $('installBanner');
+    if (ib){
+      ib.hidden = isStandalone() || ib.dataset.closed === '1';
+      $('installBtn').hidden = !installPrompt;
+      $('installText').hidden = !!installPrompt;
+    }
+    var bb = $('bkBanner');
+    if (bb) bb.hidden = !(state.logs.length && Date.now() - lastBackup > 14*864e5);
+  }
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); installPrompt = e; updateBanners(); });
+  window.addEventListener('appinstalled', function(){ installPrompt = null; updateBanners(); requestPersist(true); });
+  function refreshStorage(){
+    var el = $('persistInfo'); if (!el) return;
+    if (!navigator.storage || !navigator.storage.persisted){ el.textContent = '이 브라우저는 저장공간 보호를 지원하지 않아요.'; return; }
+    navigator.storage.persisted().then(function(ok){
+      el.textContent = ok ? '저장공간 보호 중이에요. 폰 공간이 부족해도 기록이 자동으로 지워지지 않아요.'
+        : '저장공간 보호가 꺼져 있어요. 앱 설치 후 눌러주세요.';
+      $('persistBtn').hidden = ok;
+    });
+  }
+  function requestPersist(silent){
+    if (!navigator.storage || !navigator.storage.persist) return;
+    navigator.storage.persist().then(function(ok){
+      if (!silent) $('persistInfo').textContent = ok ? '저장공간을 보호했어요.' : '브라우저가 거절했어요. 앱을 설치한 뒤 다시 눌러주세요.';
+      setTimeout(refreshStorage, 1200);
+    }).catch(function(){});
+  }
+
+  var STDS = {
+    jp2021: { cuts:[18.5,25,30], names:['저체중','보통','비만 1도','비만 2도+'],
+      totals:[[12,15],[10,13],[7,10],[0,5]], first:[[0.5,2],[0.5,2],[0.5,2],[0,2]],
+      note:'일본산부인과학회 2021. 아시아인 데이터 기반 최신 기준이에요.' },
+    cn2022: { cuts:[18.5,24,28], names:['저체중','정상','과체중','비만'],
+      totals:[[11,16],[8,14],[7,11],[5,9]], first:[[0,2],[0,2],[0,2],[0,2]],
+      note:'중국 국가표준 2022. BMI 24/28을 과체중/비만 기준선으로 써요.' },
+    iom2009: { cuts:[18.5,25,30], names:['저체중','정상','과체중','비만'],
+      totals:[[12.5,18],[11.5,16],[7,11.5],[5,9]], first:[[0.5,2],[0.5,2],[0.5,2],[0.5,2]],
+      note:'미국 IOM 2009. 국내 병원·학회 자료에서 가장 많이 쓰는 기준이에요.' }
+  };
+  var STD_NAME = { jp2021:'일본 2021', cn2022:'중국 2022', iom2009:'미국 2009' };
+  function catIn(key, bmi){
+    var s = STDS[key], i = 0;
+    while (i < 3 && bmi >= s.cuts[i]) i++;
+    return { name:s.names[i], total:s.totals[i], first:s.first[i] };
+  }
+  // 자동: 내 BMI 기준으로 출산 무렵 권장 상한이 가장 낮은 기준 선택
+  function autoKey(){
+    var b = parseFloat(state.base), h = parseFloat(state.height);
+    if (!(b > 25 && h > 100)) return 'jp2021';
+    var bmi = b / Math.pow(h/100, 2);
+    return Object.keys(STDS).reduce(function(best, k){
+      var a = catIn(best, bmi), c = catIn(k, bmi);
+      return (c.total[1] < a.total[1] || (c.total[1] === a.total[1] && c.total[0] < a.total[0])) ? k : best;
+    }, 'jp2021');
+  }
+  function stdKey(){ return state.std === 'auto' ? autoKey() : (STDS[state.std] ? state.std : 'jp2021'); }
+  function curStd(){ return STDS[stdKey()]; }
+  function stdNote(){
+    if (state.std !== 'auto') return curStd().note;
+    var b = parseFloat(state.base), h = parseFloat(state.height);
+    if (!(b > 25 && h > 100)) return '자동: 체중·키를 넣으면 상한이 가장 낮은 기준을 골라요.';
+    var bmi = b / Math.pow(h/100, 2);
+    return '자동: 상한이 가장 낮은 ' + STD_NAME[autoKey()] + ' 기준 적용 (출산 무렵 상한 '
+      + Object.keys(STDS).map(function(k){ return STD_NAME[k].split(' ')[0] + ' +' + catIn(k, bmi).total[1]; }).join(' · ') + 'kg)';
+  }
+  function catOf(bmi){
+    var s = curStd(), i = 0;
+    while (i < 3 && bmi >= s.cuts[i]) i++;
+    return { name:s.names[i], total:s.totals[i], first:s.first[i] };
+  }
+  function range(w, c){
+    if (w <= 13) return [c.first[0]*w/13, c.first[1]*w/13];
+    var t = (Math.min(w,40)-13)/27;
+    return [c.first[0] + (c.total[0]-c.first[0])*t, c.first[1] + (c.total[1]-c.first[1])*t];
+  }
+  // 임신 체중 구성 (kg). 아기: Hadlock 50백분위, 나머지: Hytten 0/10/20/30/40주
+  var FETAL = {6:0,8:0.001,9:0.002,10:0.035,11:0.045,12:0.058,13:0.073,14:0.093,15:0.117,16:0.146,17:0.181,18:0.223,19:0.273,20:0.331,21:0.399,22:0.478,23:0.568,24:0.670,25:0.785,26:0.913,27:1.055,28:1.210,29:1.379,30:1.559,31:1.751,32:1.953,33:2.162,34:2.377,35:2.595,36:2.813,37:3.028,38:3.236,39:3.435,40:3.619};
+  var HY = { pla:[0,0.05,0.52,1.18,1.45], mat:[0,0.285,1.13,2.34,4.305] }; // 태반+양수, 자궁+유방+혈액+체액
+  function lerpTbl(tbl, w){
+    var ks = Object.keys(tbl).map(Number).sort(function(a,b){ return a-b; });
+    if (w <= ks[0]) return tbl[ks[0]];
+    for (var i = 1; i < ks.length; i++) if (w <= ks[i]){ var a = ks[i-1], b = ks[i]; return tbl[a] + (tbl[b]-tbl[a])*(w-a)/(b-a); }
+    return tbl[ks[ks.length-1]];
+  }
+  function lerp5(arr, w){ var t = Math.max(0, Math.min(40, w))/10, i = Math.min(3, Math.floor(t)); return arr[i] + (arr[i+1]-arr[i])*(t-i); }
+  function comp(w){ var x = Math.min(w,40); return { baby:lerpTbl(FETAL, x), pla:lerp5(HY.pla, x), mat:lerp5(HY.mat, x) }; }
+  function pregKg(w){ var p = comp(w); return p.baby + p.pla + p.mat; }
+  function fw(kg){ return kg < 1 ? Math.round(kg*1000) + 'g' : f1(kg) + 'kg'; }
+  // 주수 표기: 15.571주 → '15주 4일'
+  function wd(w){ var d = Math.round(w*7); return Math.floor(d/7) + '주 ' + (d%7) + '일'; }
+  function f1(n){ return (Math.round(n*10)/10).toFixed(1); }
+  function sg(n){ return (n >= 0 ? '+' : '') + f1(n); }
+  function gaDays(){
+    if (typeof syncLmp === 'function') syncLmp();
+    if (!state.due) return null;
+    var d = new Date(state.due + 'T00:00:00'), t = new Date(); t.setHours(0,0,0,0);
+    if (isNaN(d)) return null;
+    var ga = 280 - Math.round((d - t)/864e5);
+    return (ga < 0 || ga > 294) ? null : ga;
+  }
+
+  var selW = null;
+  try { var sw = sessionStorage.getItem('preg-selW'); if (sw !== null && sw !== '' && !isNaN(+sw)){ selW = +sw; } sessionStorage.removeItem('preg-selW'); } catch(e){}
+
+  // inputs
+  $('base').value = state.base; $('height').value = state.height; $('due').value = state.due || '';
+  // 임신 시작일(LMP) ↔ 예정일: 예정일 = 시작일 + 280일
+  function addDays(iso, n){ var d = new Date(iso + 'T00:00:00'); if (isNaN(d)) return ''; d.setDate(d.getDate() + n);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+  function syncLmp(){ var el = $('lmp'); if (document.activeElement !== el) el.value = state.due ? addDays(state.due, -280) : ''; }
+  syncLmp();
+  $('lmp').addEventListener('input', function(){ if (!this.value) return; state.due = addDays(this.value, 280); $('due').value = state.due; save(); render(); });
+  ['base','height','due'].forEach(function(id){
+    $(id).addEventListener('input', function(){ state[id] = this.value; save(); render(); });
+  });
+  $('slider').addEventListener('input', function(){ selW = +this.value; render(); });
+  $('today').addEventListener('click', function(){
+    var ga = gaDays(); if (ga == null) return;
+    selW = Math.min(40, Math.round(ga/7)); render();
+  });
+  document.querySelectorAll('.std button').forEach(function(b){
+    b.addEventListener('click', function(){ state.std = this.dataset.std; save(); render(); });
+  });
+
+  // chart tap/drag
+  var svg = $('chart'), gS = $('gStatic'), gC = $('gCursor'), dragging = false;
+  var G = { W:360, H:250, pl:40, pr:14, pt:24, pb:28 };
+  function weekFromEvent(e){
+    var r = svg.getBoundingClientRect(), sc = r.width/G.W;
+    var x = (e.clientX - r.left)/sc;
+    return Math.max(0, Math.min(40, Math.round((x - G.pl)/(G.W - G.pl - G.pr)*40)));
+  }
+  svg.addEventListener('pointerdown', function(e){ dragging = true; selW = weekFromEvent(e); render(); });
+  svg.addEventListener('pointermove', function(e){ if (dragging){ var w = weekFromEvent(e); if (w !== selW){ selW = w; render(); } } });
+  window.addEventListener('pointerup', function(){ dragging = false; });
+
+  // log
+  var lastAdded = null;
+  $('add').addEventListener('click', function(){
+    // 입력은 주.일 표기 (15.4 = 15주 4일)
+    var raw = String($('lw').value).trim(), m = raw.match(/^(\d{1,2})(?:\.(\d))?$/);
+    var w = m && (+(m[2]||0) <= 6) ? +m[1] + (+(m[2]||0))/7 : NaN, k = parseFloat($('lk').value);
+    if (!(w >= 0 && w <= 42) || !(k > 20 && k < 300)){
+      $('logHint').textContent = '주.일(예: 15.4 = 15주 4일, 일은 0~6)과 체중을 입력하세요.'; return;
+    }
+    var rec = { w:w, k:k };
+    if (localMode){ mine.push(rec); saveMine(); }
+    else { state.logs.push(rec); state.logs.sort(function(a,b){ return a.w-b.w; }); save(); }
+    lastAdded = rec; $('lk').value = ''; selW = Math.round(Math.min(w,40));
+    $('logHint').textContent = '기록을 추가하면 그래프에 점으로 표시돼요.';
+    render();
+  });
+
+  // 카톡 공유용 요약
+  function summaryText(){
+    var base = parseFloat(state.base), h = parseFloat(state.height);
+    if (!(base > 25 && h > 100)) return '';
+    var bmi = base / Math.pow(h/100, 2), c = catOf(bmi), ga = gaDays(), t = new Date();
+    var std = STD_NAME[stdKey()] + (state.std === 'auto' ? ', 상한 최소 자동' : '');
+    var L = ['[임신 체중 요약] ' + t.getFullYear() + '.' + (t.getMonth()+1) + '.' + t.getDate() + (ga != null ? ' · ' + Math.floor(ga/7) + '주 ' + (ga%7) + '일' : '')];
+    L.push('임신 전 ' + f1(base) + 'kg · BMI ' + f1(bmi) + ' ' + c.name + ' (' + std + ' 기준)');
+    if (ga != null && ga/7 <= 40){
+      var r = range(ga/7, c);
+      L.push('오늘 정상 범위 ' + f1(base+r[0]) + '~' + f1(base+r[1]) + 'kg (중앙 ' + f1(base+(r[0]+r[1])/2) + 'kg)');
+    }
+    var logs = allLogs();
+    if (logs.length){
+      var l = logs[logs.length-1], s = statusOf(l.k, l.w, base, c), lr = range(Math.min(l.w,40), c);
+      L.push('최근 ' + wd(l.w) + ' ' + f1(l.k) + 'kg → ' + s.txt + ' (임신 전 ' + sg(l.k-base) + 'kg, 중앙 대비 ' + sg(l.k - base - (lr[0]+lr[1])/2) + ')');
+      L.push('  └ 예상 아기 ' + fw(comp(l.w).baby) + ' · 순수 몸무게 ' + f1(l.k - pregKg(l.w)) + 'kg (' + sg(l.k - pregKg(l.w) - base) + ')');
+    }
+    L.push('출산 무렵 목표 ' + f1(base+c.total[0]) + '~' + f1(base+c.total[1]) + 'kg');
+    if (logs.length > 1){
+      L.push(''); L.push('기록');
+      logs.slice(-6).forEach(function(l){ L.push('· ' + wd(l.w) + ' ' + f1(l.k) + 'kg'); });
+    }
+    return L.join('\n');
+  }
+  $('share').addEventListener('click', function(){
+    var txt = summaryText(); if (!txt) return;
+    var box = $('shareBox'), ta = $('shareText'), hint = $('shareHint');
+    ta.value = txt; box.hidden = false;
+    function fallback(){ ta.focus(); ta.select(); hint.textContent = '위 내용을 길게 눌러 복사한 뒤 카톡에 붙여넣으세요.'; }
+    if (navigator.share){
+      navigator.share({ text: txt }).then(function(){ hint.textContent = '공유했어요.'; }, function(e){
+        if (e && e.name === 'AbortError'){ hint.textContent = ''; return; }
+        copy();
+      });
+    } else copy();
+    function copy(){
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(function(){ hint.textContent = '복사했어요. 카톡 대화방에 붙여넣으세요.'; }, fallback);
+      } else fallback();
+    }
+  });
+
+  // ---- 요약 이미지 (1080x1350, 카톡 공유용) ----
+  function makeSummaryImage(){
+    var base = parseFloat(state.base), h = parseFloat(state.height);
+    if (!(base > 25 && h > 100)) return null;
+    var bmi = base / Math.pow(h/100, 2), c = catOf(bmi), ga = gaDays(), cw = ga == null ? null : ga/7, logs = allLogs();
+    var W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var g = cv.getContext('2d');
+    var C = { bg:'#F3F5F8', card:'#FFFFFF', ink:'#1D2540', muted:'#6B7390', line:'#DDE2EC', band:'#D9D3F5', accent:'#5A47C9', rose:'#D9466F', ok:'#2F8F6B', warn:'#C46A17', tint:'#F6F4FD', amber:'#E9A23B' };
+    var SANS = '"Apple SD Gothic Neo","Malgun Gothic",sans-serif', SERIF = 'Georgia,serif';
+    function font(sz, wt, fam){ g.font = (wt||400) + ' ' + sz + 'px ' + (fam||SANS); }
+    function txt(t, x, y, col, al){ g.fillStyle = col; g.textAlign = al || 'left'; g.fillText(t, x, y); }
+    function rr(x, y, w, hh, r, col){ g.beginPath(); g.moveTo(x+r, y); g.arcTo(x+w, y, x+w, y+hh, r); g.arcTo(x+w, y+hh, x, y+hh, r); g.arcTo(x, y+hh, x, y, r); g.arcTo(x, y, x+w, y, r); g.closePath(); g.fillStyle = col; g.fill(); }
+    g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
+    var t = new Date(), stdName = STD_NAME[stdKey()];
+    font(64, 700, SERIF); txt('임신 체중 요약', 72, 130, C.ink);
+    font(30, 500); txt(t.getFullYear() + '.' + (t.getMonth()+1) + '.' + t.getDate() + (ga != null ? '  ·  ' + Math.floor(ga/7) + '주 ' + (ga%7) + '일' : '') + '  ·  ' + stdName + ' 기준', 72, 186, C.muted);
+
+    // 핵심 카드
+    rr(56, 228, W-112, 300, 32, C.card);
+    var last = logs.length ? logs[logs.length-1] : null;
+    if (last){
+      var st = statusOf(last.k, last.w, base, c), col = C[st.col] || C.ok, lr = range(Math.min(last.w,40), c);
+      font(28, 500); txt('최근 기록 · ' + wd(last.w), 104, 292, C.muted);
+      font(96, 700, SERIF); txt(f1(last.k), 104, 400, C.ink);
+      var wk = g.measureText(f1(last.k)).width; font(40, 500); txt('kg', 114 + wk, 400, C.muted);
+      font(30, 600); var pw = g.measureText(st.txt).width + 48; rr(104, 428, pw, 56, 28, col); txt(st.txt, 104 + pw/2, 467, '#fff', 'center');
+      font(28, 500); txt('정상 ' + f1(base+lr[0]) + '~' + f1(base+lr[1]) + 'kg · 중앙 대비 ' + sg(last.k - base - (lr[0]+lr[1])/2), 104 + pw + 20, 466, C.muted);
+    } else { font(34, 500); txt('아직 기록이 없어요', 104, 360, C.muted); }
+    if (cw != null && cw <= 40){
+      var tr = range(cw, c);
+      font(26, 500); txt('오늘 정상 범위', W-104, 292, C.muted, 'right');
+      font(44, 700); txt(f1(base+tr[0]) + '~' + f1(base+tr[1]), W-104, 350, C.accent, 'right');
+      font(26, 500); txt('중앙 ' + f1(base+(tr[0]+tr[1])/2) + 'kg', W-104, 392, C.muted, 'right');
+    }
+
+    // 3 타일
+    var tiles = [['임신 전', f1(base) + 'kg', 'BMI ' + f1(bmi) + ' ' + c.name], ['출산 무렵 상한', f1(base + c.total[1]) + 'kg', '증가 +' + c.total[1] + 'kg 이내']];
+    if (last){ var pure = last.k - pregKg(last.w); tiles.push(['순수 몸무게', f1(pure) + 'kg', '임신 전 대비 ' + sg(pure - base)]); }
+    else tiles.push(['총 권장 증가', '+' + c.total[0] + '~' + c.total[1], 'kg']);
+    var tw = (W - 112 - 32) / 3;
+    tiles.forEach(function(tl, i){
+      var x = 56 + i*(tw + 16); rr(x, 552, tw, 170, 24, C.card);
+      font(26, 500); txt(tl[0], x + 32, 600, C.muted);
+      font(44, 700); txt(tl[1], x + 32, 658, i === 1 ? C.rose : C.ink);
+      font(24, 400); txt(tl[2], x + 32, 698, C.muted);
+    });
+
+    // 그래프
+    rr(56, 746, W-112, 380, 32, C.card);
+    var pl = 140, pr = 100, pt = 790, pb = 1070;
+    var lo = base - 1, hi = base + c.total[1] + 1;
+    logs.forEach(function(l){ lo = Math.min(lo, l.k - 1); hi = Math.max(hi, l.k + 1); });
+    var step = (hi - lo) <= 12 ? 2 : (hi - lo) <= 24 ? 4 : 5; lo = Math.floor(lo/step)*step; hi = Math.ceil(hi/step)*step;
+    var X = function(w){ return pl + w/40*(W-pl-pr); }, Y = function(k){ return pt + (hi-k)/(hi-lo)*(pb-pt); };
+    g.fillStyle = C.tint; g.fillRect(X(13), pt, X(27)-X(13), pb-pt);
+    font(22, 400);
+    for (var k = lo; k <= hi; k += step){ g.strokeStyle = C.line; g.lineWidth = 1.5; g.beginPath(); g.moveTo(pl, Y(k)); g.lineTo(W-pr, Y(k)); g.stroke(); txt(String(k), pl-14, Y(k)+8, C.muted, 'right'); }
+    [0,10,20,30,40].forEach(function(w){ txt(w + '주', X(w), pb + 36, C.muted, 'center'); });
+    g.beginPath();
+    for (var w = 0; w <= 40; w += 0.5){ var r = range(w, c); g[w ? 'lineTo' : 'moveTo'](X(w), Y(base+r[1])); }
+    for (w = 40; w >= 0; w -= 0.5){ r = range(w, c); g.lineTo(X(w), Y(base+r[0])); }
+    g.closePath(); g.fillStyle = C.band; g.fill();
+    g.beginPath(); for (w = 0; w <= 40; w += 0.5){ r = range(w, c); g[w ? 'lineTo' : 'moveTo'](X(w), Y(base+(r[0]+r[1])/2)); }
+    g.strokeStyle = C.accent; g.lineWidth = 4; g.stroke();
+    var rE = range(40, c); font(24, 700); txt('상한 ' + f1(base+rE[1]), W-pr, Y(base+rE[1])-16, C.rose, 'right');
+    if (cw != null && cw <= 40){ g.setLineDash([8,8]); g.strokeStyle = C.rose; g.lineWidth = 2.5; g.beginPath(); g.moveTo(X(cw), pt); g.lineTo(X(cw), pb); g.stroke(); g.setLineDash([]); font(22, 700); txt('오늘', X(cw)+8, pb-10, C.rose); }
+    var pts = logs.filter(function(l){ return l.w <= 40; });
+    if (pts.length > 1){ g.beginPath(); pts.forEach(function(l, i){ g[i ? 'lineTo' : 'moveTo'](X(l.w), Y(l.k)); }); g.strokeStyle = C.rose; g.lineWidth = 3; g.stroke(); }
+    pts.forEach(function(l){ g.beginPath(); g.arc(X(l.w), Y(l.k), 10, 0, 7); g.fillStyle = C.rose; g.fill(); g.lineWidth = 3; g.strokeStyle = '#fff'; g.stroke(); });
+
+    // 무게 구성 (오늘 또는 최근 기록 주수)
+    var cwk = cw != null ? Math.min(cw, 40) : (last ? last.w : 20), p = comp(cwk), rc = range(cwk, c), mid = (rc[0]+rc[1])/2;
+    var rest = Math.max(0, mid - p.baby - p.pla - p.mat), parts = [[p.baby, C.rose, '아기'], [p.pla, C.amber, '태반·양수'], [p.mat, C.band, '자궁·혈액 등'], [rest, C.accent, '엄마 순수']];
+    var tot = parts.reduce(function(a, b){ return a + b[0]; }, 0) || 1;
+    rr(56, 1150, W-112, 150, 32, C.card);
+    font(26, 600); txt('무게 구성 · ' + wd(cwk) + ' 권장 중앙 +' + f1(mid) + 'kg', 96, 1198, C.ink);
+    var bx = 96, bw = W - 192, x0 = bx;
+    g.save(); rr(bx, 1218, bw, 22, 11, C.line); g.clip();
+    parts.forEach(function(pp){ var ww = pp[0]/tot*bw; g.fillStyle = pp[1]; g.fillRect(x0, 1218, ww, 22); x0 += ww; });
+    g.restore();
+    font(23, 500); var lx = 96;
+    parts.forEach(function(pp){ g.fillStyle = pp[1]; g.fillRect(lx, 1258, 18, 18); var s2 = pp[2] + ' ' + fw(pp[0]); txt(s2, lx + 26, 1275, C.muted); lx += 26 + g.measureText(s2).width + 26; });
+    return cv;
+  }
+  var imgUrl = null, imgTimer = null;
+  function buildImg(cb){
+    var ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    ready.then(function(){
+      var cv = makeSummaryImage(); if (!cv) return;
+      cv.toBlob(function(blob){
+        if (!blob) return;
+        if (imgUrl) URL.revokeObjectURL(imgUrl);
+        imgUrl = URL.createObjectURL(blob); $('imgOut').src = imgUrl; $('imgBox').hidden = false;
+        if (cb) cb(blob);
+      }, 'image/png');
+    });
+  }
+  // 기록·설정이 바뀌면 열려 있는 미리보기 이미지도 자동 갱신
+  function refreshImg(){ if ($('imgBox').hidden) return; clearTimeout(imgTimer); imgTimer = setTimeout(function(){ buildImg(); }, 300); }
+  $('shareImg').addEventListener('click', function(){
+    var hint = $('imgHint');
+    buildImg(function(blob){
+        var t = new Date(), name = '임신체중요약_' + t.getFullYear() + String(t.getMonth()+1).padStart(2,'0') + String(t.getDate()).padStart(2,'0') + '.png';
+        hint.textContent = '이미지를 길게 눌러 저장하거나 공유할 수도 있어요. 기록을 고치면 이 이미지도 자동으로 바뀌어요.';
+        var file = null; try { file = new File([blob], name, { type:'image/png' }); } catch(e){}
+        function viaDownloads(){ downloadBlob(blob, name); hint.textContent = '사진(다운로드 폴더)에 저장했어요. 카톡에서 사진으로 보내면 돼요.'; }
+        if (file && navigator.canShare && navigator.canShare({ files:[file] })){
+          navigator.share({ files:[file] }).then(function(){ hint.textContent = '공유했어요.'; }, function(e){ if (!e || e.name !== 'AbortError') viaDownloads(); });
+        } else viaDownloads();
+    });
+  });
+
+  function statusOf(k, w, base, c){
+    var r = range(Math.min(w,40), c);
+    if (k < base + r[0] - 0.05) return { cls:'lo', col:'accent', txt:'권장보다 적음' };
+    if (k > base + r[1] + 0.05) return { cls:'hi', col:'warn', txt:'권장보다 많음' };
+    return { cls:'ok', col:'ok', txt:'권장 범위' };
+  }
+
+  // ---- 그래프: 정적 레이어는 데이터가 바뀔 때만 다시 그리고, 커서는 부드럽게 이동 ----
+  var ctx = null, staticKey = '', catKey = '';
+  var anim = { w:null, target:0, raf:0 };
+
+  function render(){
+    if (state.std !== 'auto' && !STDS[state.std]) state.std = 'auto';
+    document.querySelectorAll('.std button').forEach(function(b){ b.setAttribute('aria-checked', b.dataset.std === state.std ? 'true' : 'false'); });
+    $('stdNote').textContent = stdNote();
+    var base = parseFloat(state.base), h = parseFloat(state.height);
+    var ok = base > 25 && base < 250 && h > 100 && h < 230;
+    $('empty').hidden = ok; $('main').hidden = !ok;
+    if (!ok) return;
+
+    var bmi = base / Math.pow(h/100, 2), c = catOf(bmi);
+    var ga = gaDays(), cw = ga == null ? null : ga/7;
+    if (selW == null) selW = cw == null ? 20 : Math.min(40, Math.round(cw));
+    $('slider').value = selW;
+    $('today').hidden = (cw == null || cw > 40);
+    $('today').setAttribute('aria-pressed', cw != null && selW === Math.min(40, Math.round(cw)) ? 'true' : 'false');
+    if (!$('lw').value && ga != null) $('lw').value = Math.floor(Math.min(ga,294)/7) + '.' + (Math.min(ga,294)%7);
+
+    $('sBmi').textContent = f1(bmi) + ' ' + c.name;
+    $('sTotal').textContent = c.total[0] === 0 ? c.total[1] + 'kg 이하' : '+' + c.total[0] + '~' + c.total[1] + 'kg';
+    $('sRate').textContent = f1(base + c.total[0]) + '~' + f1(base + c.total[1]) + 'kg';
+
+    $('rWk').innerHTML = selW + '<small>주</small>';
+
+    // 상태 2줄 (항상 2줄 높이 고정)
+    var near = allLogs().filter(function(l){ return Math.abs(l.w - selW) < 0.5; });
+    var s1 = '<span class="none">이 주수에는 기록이 없어요</span>';
+    if (near.length){
+      var l = near[near.length-1], s = statusOf(l.k, l.w, base, c);
+      var lr = range(Math.min(l.w,40), c), md = base + (lr[0]+lr[1])/2;
+      s1 = '<span class="dot" style="background:var(--rose)"></span>' + wd(l.w) + ' 기록 <b>' + f1(l.k) + 'kg</b> · <span style="color:var(--' + s.col + ')">' + s.txt + '</span> · 중앙 대비 ' + sg(l.k - md);
+    }
+    var s2 = '';
+    if (cw != null){
+      var tr = range(Math.min(cw,40), c);
+      s2 = '<span class="dot" style="background:transparent;border:1.5px dashed var(--rose)"></span>오늘 ' + Math.floor(ga/7) + '주 ' + (ga%7) + '일 정상 ' + f1(base+tr[0]) + '~' + f1(base+tr[1]) + 'kg · 중앙 <b>' + f1(base+(tr[0]+tr[1])/2) + 'kg</b>';
+    }
+    $('st1').innerHTML = s1; $('st2').innerHTML = s2;
+
+    drawStatic(base, c, cw);
+    moveCursor(selW);
+    drawComp(base, c);
+    if (typeof refreshImg === 'function') refreshImg();
+    drawList(base, c);
+    drawTable(base, c);
+  }
+
+  function drawStatic(base, c, cw){
+    var W=G.W, H=G.H, pl=G.pl, pr=G.pr, pt=G.pt, pb=G.pb;
+    var lo = base - 1, hi = base + c.total[1] + 1;
+    var LOGS = allLogs();
+    LOGS.forEach(function(l){ lo = Math.min(lo, l.k - 1); hi = Math.max(hi, l.k + 1); });
+    lo = Math.floor(lo); hi = Math.ceil(hi);
+    var span = hi - lo, step = span <= 12 ? 2 : span <= 24 ? 4 : 5;
+    lo = Math.floor(lo/step)*step; hi = Math.ceil(hi/step)*step;
+    var x = function(w){ return pl + w/40*(W-pl-pr); };
+    var y = function(k){ return pt + (hi-k)/(hi-lo)*(H-pt-pb); };
+    ctx = { base:base, c:c, x:x, y:y, lo:lo, hi:hi };
+
+    var key = JSON.stringify([base, c.total, c.first, LOGS, cw == null ? null : Math.round(cw*7), lo, hi]);
+    if (key === staticKey) return;
+    var ck = JSON.stringify([base, c.total, c.first]);
+    var enter = ck !== catKey && !reduce;
+    staticKey = key; catKey = ck;
+
+    var o = '';
+    // 2분기 배경 음영
+    o += '<rect x="'+x(13)+'" y="'+pt+'" width="'+(x(27)-x(13))+'" height="'+(H-pt-pb)+'" fill="var(--tint)"/>';
+    [[0,13,'1분기'],[13,27,'2분기'],[27,40,'3분기']].forEach(function(t){
+      o += '<text class="tri" x="'+((x(t[0])+x(t[1]))/2)+'" y="'+(pt-8)+'" text-anchor="middle">'+t[2]+'</text>';
+    });
+    for (var k = lo; k <= hi; k += step){
+      o += '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(k)+'" y2="'+y(k)+'" stroke="var(--line)" stroke-width="0.7"/>';
+      o += '<text class="ax" x="'+(pl-6)+'" y="'+(y(k)+3.5)+'" text-anchor="end">'+k+'</text>';
+    }
+    [0,10,20,30,40].forEach(function(w){
+      o += '<text class="ax" x="'+x(w)+'" y="'+(H-pb+17)+'" text-anchor="middle">'+w+'주</text>';
+    });
+    var up = [], dn = [], mid = [];
+    for (var w = 0; w <= 40; w += 0.5){
+      var r = range(w, c);
+      up.push(x(w)+','+y(base+r[1])); dn.unshift(x(w)+','+y(base+r[0])); mid.push(x(w)+','+y(base+(r[0]+r[1])/2));
+    }
+    o += '<g class="'+(enter?'enter':'')+'">';
+    o += '<polygon class="band" points="'+up.concat(dn).join(' ')+'" fill="var(--band)" opacity="0.9"/>';
+    o += '<polyline class="mid" points="'+mid.join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linejoin="round"/>';
+    o += '</g>';
+    // 임신 전 체중 기준선
+    o += '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(base)+'" y2="'+y(base)+'" stroke="var(--muted)" stroke-width="0.9" stroke-dasharray="2 3"/>';
+    o += '<text x="'+(W-pr)+'" y="'+(y(base)+13)+'" text-anchor="end">임신 전 '+f1(base)+'</text>';
+    // 출산 무렵 범위 라벨
+    var rEnd = range(40, c);
+    o += '<text class="lbl" x="'+(W-pr-2)+'" y="'+(y(base+rEnd[1])-6)+'" text-anchor="end" style="fill:var(--accent)">'+f1(base+rEnd[0])+'~'+f1(base+rEnd[1])+'</text>';
+
+    if (cw != null && cw <= 40){
+      var tr = range(cw, c);
+      o += '<line x1="'+x(cw)+'" x2="'+x(cw)+'" y1="'+pt+'" y2="'+(H-pb)+'" stroke="var(--rose)" stroke-width="1.2" stroke-dasharray="3 3"/>';
+      o += '<text class="lbl" x="'+(x(cw)+(cw > 34 ? -4 : 4))+'" y="'+(H-pb-5)+'" text-anchor="'+(cw > 34 ? 'end' : 'start')+'" style="fill:var(--rose)">오늘</text>';
+      o += '<circle cx="'+x(cw)+'" cy="'+y(base+(tr[0]+tr[1])/2)+'" r="3" fill="var(--surface)" stroke="var(--rose)" stroke-width="1.5"/>';
+    }
+    var path = [];
+    LOGS.forEach(function(l){ if (l.w <= 40) path.push(x(l.w)+','+y(l.k)); });
+    if (path.length > 1) o += '<polyline points="'+path.join(' ')+'" fill="none" stroke="var(--rose)" stroke-width="1.5" stroke-linejoin="round" opacity="0.75"/>';
+    LOGS.forEach(function(l, i){
+      if (l.w > 40) return;
+      var isNew = l === lastAdded || l.ref === lastAdded;
+      var cls = (enter || isNew) && !reduce ? 'pt' : '';
+      o += '<g class="'+(enter||isNew?'enter':'')+'"><circle class="'+cls+'" cx="'+x(l.w)+'" cy="'+y(l.k)+'" r="4.2" fill="'+(l.mine?'var(--surface)':'var(--rose)')+'" stroke="'+(l.mine?'var(--rose)':'var(--surface)')+'" stroke-width="1.5" style="animation-delay:'+(enter? (0.35 + i*0.04) : 0)+'s"/></g>';
+    });
+    gS.innerHTML = o;
+  }
+
+  // 커서: 목표 주수로 부드럽게 따라감 (requestAnimationFrame)
+  function moveCursor(target){
+    anim.target = target;
+    if (anim.w == null || reduce){ anim.w = target; drawCursor(); return; }
+    if (!anim.raf) anim.raf = requestAnimationFrame(tick);
+  }
+  function tick(){
+    anim.raf = 0;
+    var d = anim.target - anim.w;
+    if (Math.abs(d) < 0.02) anim.w = anim.target; else anim.w += d * 0.28;
+    drawCursor();
+    if (anim.w !== anim.target) anim.raf = requestAnimationFrame(tick);
+  }
+  function drawCursor(){
+    if (!ctx) return;
+    var w = anim.w, x = ctx.x, y = ctx.y, base = ctx.base, r = range(w, ctx.c);
+    var cx = x(w), yU = y(base+r[1]), yL = y(base+r[0]), yM = y(base+(r[0]+r[1])/2);
+    var right = w < 30, tx = right ? cx + 10 : cx - 10, anc = right ? 'start' : 'end';
+    var midTxt = f1(base+(r[0]+r[1])/2);
+    var bw = 46, bx = right ? tx - 4 : tx - bw + 4;
+    var o = '';
+    o += '<line x1="'+cx+'" x2="'+cx+'" y1="'+G.pt+'" y2="'+(G.H-G.pb)+'" stroke="var(--accent)" stroke-width="1.3" opacity="0.85"/>';
+    o += '<rect x="'+(cx-4)+'" y="'+yU+'" width="8" height="'+Math.max(1.5, yL-yU)+'" rx="2" fill="var(--accent)" opacity="0.35"/>';
+    o += '<line x1="'+(cx-6)+'" x2="'+(cx+6)+'" y1="'+yU+'" y2="'+yU+'" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>';
+    o += '<line x1="'+(cx-6)+'" x2="'+(cx+6)+'" y1="'+yL+'" y2="'+yL+'" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>';
+    o += '<circle cx="'+cx+'" cy="'+yM+'" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.5"/>';
+    var by = yU - 26; if (by < G.pt + 2) by = yL + 8;
+    o += '<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="18" rx="9" fill="var(--accent)"/>';
+    o += '<text class="lbl" x="'+(bx+bw/2)+'" y="'+(by+13)+'" text-anchor="middle" style="fill:var(--surface)">'+midTxt+'</text>';
+    gC.innerHTML = o;
+
+    // 상단 수치도 같은 보간값으로 함께 움직임
+    $('rKg').textContent = f1(base + r[0]) + ' ~ ' + f1(base + r[1]) + ' kg';
+    $('rGain').textContent = '임신 전 +' + f1(r[0]) + '~' + f1(r[1]) + 'kg · 중앙 ' + midTxt + 'kg';
+  }
+
+  function drawComp(base, c){
+    var r = range(selW, c), mid = (r[0]+r[1])/2, p = comp(selW);
+    var rest = Math.max(0, mid - p.baby - p.pla - p.mat), tot = Math.max(0.001, p.baby + p.pla + p.mat + rest);
+    $('cWk').textContent = selW + '주 · 권장 중앙 +' + f1(mid) + 'kg';
+    var parts = [p.baby, p.pla, p.mat, rest];
+    var bars = $('cBar').children;
+    parts.forEach(function(v, i){ bars[i].style.width = (v/tot*100) + '%'; });
+    $('c1').textContent = fw(p.baby); $('c2').textContent = fw(p.pla); $('c3').textContent = fw(p.mat); $('c4').textContent = fw(rest);
+    // 기록이 있으면 순수 몸무게 계산
+    var near = allLogs().filter(function(l){ return Math.abs(l.w - selW) < 0.5; });
+    var out = '';
+    if (near.length){
+      var l = near[near.length-1], pk = pregKg(l.w), pure = l.k - pk;
+      out = wd(l.w) + ' 기록 <b>' + f1(l.k) + 'kg</b> − 임신 관련 ' + f1(pk) + 'kg = 순수 몸무게 <b>' + f1(pure) + 'kg</b> (임신 전 대비 ' + sg(pure - base) + 'kg)';
+    }
+    $('cPure').innerHTML = out;
+  }
+
+  var listKey = '';
+  function drawList(base, c){
+    var LOGS = allLogs();
+    var key = JSON.stringify([base, c.total, c.first, LOGS]);
+    if (key === listKey) return; listKey = key;
+    var ul = $('list');
+    ul.innerHTML = LOGS.map(function(l, i){
+      var s = statusOf(l.k, l.w, base, c), d = l.k - base;
+      var lr = range(Math.min(l.w,40), c), md = base + (lr[0]+lr[1])/2, dm = l.k - md;
+      var del = localMode && !l.mine ? '<span></span>' : '<button class="del" type="button" data-i="'+i+'" aria-label="'+wd(l.w)+' 기록 삭제">삭제</button>';
+      return '<li class="'+((l === lastAdded || l.ref === lastAdded) ? 'new' : '')+(l.mine ? ' mine' : '')+'"><span class="w">'+wd(l.w)+'</span>'
+        + '<span class="k"><b>'+f1(l.k)+'kg</b><span class="'+s.cls+'">'+sg(d)+'kg · '+s.txt+'</span>'
+        + '<span class="rg">정상 '+f1(base+lr[0])+'~'+f1(base+lr[1])+'kg · 중앙 '+f1(md)+'kg ('+sg(dm)+')</span>'
+        + '<span class="rg">아기 약 '+fw(comp(l.w).baby)+' · 순수 몸무게 '+f1(l.k - pregKg(l.w))+'kg ('+sg(l.k - pregKg(l.w) - base)+')</span></span>'
+        + del + '</li>';
+    }).join('');
+    ul.querySelectorAll('.del').forEach(function(b){
+      b.addEventListener('click', function(){
+        var l = LOGS[+this.dataset.i]; lastAdded = null;
+        if (l.mine){ mine.splice(mine.indexOf(l.ref), 1); saveMine(); render(); return; }
+        state.logs.splice(state.logs.indexOf(l), 1); save(); render();
+      });
+    });
+  }
+
+  function drawTable(base, c){
+    var rows = '<tr><th>주수</th><th>권장 증가</th><th>권장 체중</th></tr>';
+    [4,8,12,16,20,24,28,32,36,40].forEach(function(w){
+      var r = range(w, c);
+      rows += '<tr class="'+(Math.abs(w - selW) < 2 ? 'cur' : '')+'"><td>'+w+'주</td><td>+'+f1(r[0])+'~'+f1(r[1])+'</td><td>'+f1(base+r[0])+'~'+f1(base+r[1])+'</td></tr>';
+    });
+    $('table').innerHTML = rows;
+  }
+
+  $('bkOut').addEventListener('click', exportBackup);
+  $('bkNow').addEventListener('click', exportBackup);
+  $('installBtn').addEventListener('click', function(){
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    installPrompt.userChoice.then(function(){ installPrompt = null; updateBanners(); }, function(){});
+  });
+  $('installClose').addEventListener('click', function(){ $('installBanner').dataset.closed = '1'; updateBanners(); });
+  $('persistBtn').addEventListener('click', function(){ requestPersist(false); });
+  // IndexedDB가 원본. localStorage만 있던 예전 데이터는 옮겨 담음
+  idbGet('state').then(function(v){
+    if (v && (v.updatedAt || 0) > (state.updatedAt || 0)){
+      ['base','height','due','std','updatedAt'].forEach(function(f){ if (v[f] !== undefined) state[f] = v[f]; });
+      state.logs = cleanLogs(v.logs || []);
+      try { localStorage.setItem(KEY, JSON.stringify(snapshot())); } catch(e){}
+      applyState();
+    } else if (state.updatedAt || state.logs.length) idbPut('state', snapshot()).catch(function(){});
+  }, function(){});
+  idbGet('lastBackup').then(function(v){ if (v && v > lastBackup){ lastBackup = v; updateBanners(); } }, function(){});
+  if (isStandalone()) requestPersist(true);
+  refreshStorage();
+  window.X = { get state(){ return state; }, importData:importData, snapshot:snapshot, APP_VERSION:APP_VERSION };
+  $('bkIn').addEventListener('change', function(){ if (this.files && this.files[0]) importBackup(this.files[0]); this.value = ''; });
+  window.addEventListener('pageshow', function(){ staticKey = ''; render(); });
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden){ staticKey = ''; render(); } });
+
+  render(); updateBanners();
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
+</script>
+</body>
+</html>
